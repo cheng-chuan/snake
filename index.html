@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>贪吃蛇</title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding: 0;
+				-webkit-tap-highlight-color: transparent;
+			}
+			#canvas,#mark{
+				position: absolute;
+				display:block;
+				width: 500px;
+				height: 500px;
+				border: 1px solid #d3d3d3;
+				left: 50%;
+				margin-top: 100px;
+				margin-left: -250px;
+			}
+			#mark{
+				display: none;
+			}
+			#mark h1{
+				text-align: center;
+				color: #FF0000;
+				margin-top: 230px;
+			}
+			#mark h2{
+				text-align: center;
+			}
+			#mark button{
+				
+				position: absolute;
+				left: 50%;
+				margin-left: -50px;
+				text-align: center;
+				width: 100px;
+				height: 60px;
+				font-size: 20px;
+				line-height: 60px;
+				color: crimson;
+				border-radius: 5px;
+				border: #DC143C 1px solid;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas"></canvas>
+		<div id="mark">
+			<span></span>
+			<button>再来一局</button>
+		</div>
+		
+
+		<script type="text/javascript">
+			var canvas = document.getElementById("canvas");
+			var ctx = canvas.getContext("2d");
+			
+			var oDiv = document.getElementById("mark");
+			var oBtn = document.getElementsByTagName("button")[0];
+			var oSpan = document.getElementsByTagName("span")[0];
+
+			var arr = [{x:10,y:9},{x:10,y:8}];// 贪吃蛇方块位置
+			var dirction = 40;// 键盘方向的数值
+			var food = null;// 声明食物
+			var start = true;// 声明暂停或开始
+			
+			
+			// 设置画笔颜色
+			ctx.shadowBlur = 10;
+			ctx.shadowColor = "black";
+			
+			
+			function onFrame(){
+				if(arr[0].x <0 || arr[0].x >29 || arr[0].y <0 || arr[0].y >29 || !start){
+					return;
+				}
+				// 如果有食物,将食物放到数组头部
+				if(food){
+					if((dirction==40&&arr[0].x==food.x&&arr[0].y+1==food.y)||
+					(dirction==38&&arr[0].x==food.x&&arr[0].y-1==food.y) ||
+					(dirction==37&&arr[0].x-1==food.x&&arr[0].y==food.y) ||
+					(dirction==39&&arr[0].x+1==food.x&&arr[0].y==food.y)){
+						arr.unshift(food);
+						food = null;
+					}
+				}
+				
+				arr.unshift(arr.pop());// 将最后一个放在第一个
+				// 判断方向
+				switch (dirction){
+					case 40:
+						arr[0].x = arr[1].x;
+						arr[0].y = arr[1].y +1;
+						break;
+					case 38:
+						arr[0].x = arr[1].x;
+						arr[0].y = arr[1].y -1;
+						break;
+					case 37:
+						arr[0].x = arr[1].x -1;
+						arr[0].y = arr[1].y;
+						break;
+					case 39:
+					arr[0].x = arr[1].x +1;
+					arr[0].y = arr[1].y;
+						break;
+				}
+				
+				ctx.clearRect(0,0,500,500);// 在画之前先清除画布
+				for(var i=0;i<arr.length;i++){
+					ctx.fillRect(arr[i].x*10,arr[i].y*5,10,5);
+				} 
+				
+				// 判断食物
+				if(!food){
+					food = {x:Math.floor(Math.random()*28),y:Math.floor(Math.random()*28)};
+				}
+				if(food){
+					ctx.fillRect(food.x*10,food.y*5,10,5);
+				}
+				
+				 // 判断边界碰撞
+				if(arr[0].x <0 || arr[0].x >29 || arr[0].y <0 || arr[0].y >29){
+					oDiv.style.display = "block";
+					oDiv.style.backgroundColor = "rgba(0,0,0,0.2)"
+					oSpan.innerHTML = "<h1>Game Over</h1> <h2>菜鸟一样的你只获得了"+(arr.length-2)+"分</h2>";
+				} 			
+			}
+
+			
+			// 定时器运动
+			var timer = setInterval(onFrame,100);
+			
+			// 键盘控制方向
+			document.onkeyup = function(e){
+				// 如果是方向键
+				if(e.keyCode<=40&&e.keyCode>=37&&Math.abs(e.keyCode - dirction) !=2){
+					dirction = e.keyCode;
+				}
+				// 如果是空格键
+				if(e.keyCode == 32){
+					if(start == true){
+						start = !start;
+					}else{
+						setTimeout(function(){
+							start = !start;
+							oDiv.style.display = "none";
+						},1000);
+					}
+					
+					if(!start){
+						oDiv.style.display = "block";
+						oDiv.style.backgroundColor = "rgba(0,0,0,0.2)"
+						oDiv.innerHTML = "<h1>暂停</h1>";
+					}
+					
+				}
+			}
+			
+			// 按钮点击,刷新页面
+			oBtn.onclick = function(){
+				location.reload();
+			}
+			
+		</script>
+		
+	</body>
+</html>
